@@ -3,82 +3,98 @@
 
 <head>
     <script src="https://aframe.io/releases/1.2.0/aframe.min.js"></script>
-    <script src="https://cdn.rawgit.com/jeromeetienne/AR.js/2.2.2/aframe/build/aframe-ar.js"></script>
+    <script src="https://raw.githack.com/AR-js-org/AR.js/master/aframe/build/aframe-ar.js"></script>
+    <title>AR Nearby Places</title>
 </head>
 
 <body style="margin: 0; overflow: hidden;">
-    <a-scene embedded arjs="sourceType: webcam; debugUIEnabled: false;" vr-mode-ui="enabled: false">
-        <!-- User's location marker -->
-        <a-marker gps-camera-user-location>
-            <a-box position="0 0.5 0" color="#4CC3D9"></a-box>
-        </a-marker>
+    <a-scene embedded arjs='sourceType: webcam;'>
+        
+        <!-- Here we setup the AR scene with a camera -->
+        <a-entity camera></a-entity>
 
-        <!-- Places container -->
+        <!-- This is the container for our places -->
         <a-entity id="places-container"></a-entity>
+
     </a-scene>
 
     <script>
-        // Get user's location
-        if ('geolocation' in navigator) {
-            navigator.geolocation.getCurrentPosition(function (position) {
-                const userLatitude = position.coords.latitude;
-                const userLongitude = position.coords.longitude;
+        // Function to add a place in AR
+        function addPlace(name, latitude, longitude) {
+            // Create a new entity for the place
+            const place = document.createElement('a-entity');
 
-                // Call a function to load nearby places using userLatitude and userLongitude
-                loadNearbyPlaces(userLatitude, userLongitude);
-            });
-        } else {
-            console.error('Geolocation is not available in this browser.');
-        }
+            // Use the gps-entity-place component to position the entity at the correct latitude and longitude
+            place.setAttribute('gps-entity-place', `latitude: ${latitude}; longitude: ${longitude};`);
 
-        // Load nearby places using the Google Places API
-        // Load nearby places using Nominatim API
-        function loadNearbyPlaces(latitude, longitude) {
-            const apiUrl = `https://nominatim.openstreetmap.org/reverse?format=json&lat=${latitude}&lon=${longitude}`;
-
-            fetch(apiUrl)
-                .then((response) => response.json())
-                .then((data) => {
-                    // Parse the Nominatim response and extract nearby places or addresses.
-                    const nearbyPlaces = data.display_name; // You can choose which part of the response to display.
-
-                    // Create an AR marker for the nearby place.
-                    const placeMarker = document.createElement('a-marker');
-                    placeMarker.setAttribute('gps-entity-place', `latitude: ${latitude}; longitude: ${longitude};`);
-                    placeMarker.innerHTML = `<a-box position="0 0.5 0" color="#FF5733" scale="0.5 0.5 0.5"></a-box>`;
-                    placesContainer.appendChild(placeMarker);
-                })
-                .catch((error) => console.error('Error loading nearby places:', error));
-        }
-
-        // Load nearby points of interest (POIs) using Overpass API
-        function loadNearbyPOIs(latitude, longitude) {
-            const radius = 1000; // Define your desired search radius in meters
-
-            // Construct a basic Overpass QL query to fetch points of interest.
-            const overpassQuery = `
-                [out:json];
-                (
-                node(around:${radius},${latitude},${longitude})["tourism"];
-                way(around:${radius},${latitude},${longitude})["tourism"];
-                relation(around:${radius},${latitude},${longitude})["tourism"];
-                );
-                out center;
+            // Add a 3D model or a simple shape for the place
+            place.innerHTML = `
+                <a-box position="0 1 0" material="opacity: 0.75;" height="2">
+                    <a-text value="${name}" side="double" anchor="center" align="center" position="0 0 0.51" width="4"></a-text>
+                </a-box>
             `;
 
-            // Encode the query to be part of the URL.
-            const encodedQuery = encodeURIComponent(overpassQuery);
-
-            // Build the Overpass API URL.
-            const apiUrl = `https://overpass-api.de/api/interpreter?data=${encodedQuery}`;
-
-            fetch(apiUrl)
-                .then((response) => response.json())
-                .then((data) => {
-                    // Process the data and create AR markers for nearby points of interest.
-                })
-                .catch((error) => console.error('Error loading nearby POIs:', error));
+            // Append the place to the places container
+            document.querySelector('#places-container').appendChild(place);
         }
+
+        // This function will get nearby places of attraction from the Overpass API
+        function getNearbyPlaces(latitude, longitude) {
+            const query = `
+                [out:json][timeout:25];
+                // gather results
+                (
+                  // query for nodes (points of interest)
+                  node["tourism"="attraction"](around:200000,${latitude},${longitude});
+                  // query for ways (polygons)
+                  way["tourism"="attraction"](around:200000,${latitude},${longitude});
+                  // query for relations (complex structures)
+                  relation["tourism"="attraction"](around:200000,${latitude},${longitude});
+                );
+                // print results
+                out body;
+                >;
+                out skel qt;
+            `;
+
+            // Overpass API URL
+            const overpassUrl = 'https://overpass-api.de/api/interpreter';
+
+            // Make an AJAX request to the Overpass API
+            fetch(overpassUrl, {
+                method: 'POST',
+                body: 'data=' + encodeURIComponent(query),
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8'
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                // Process the JSON data into the addPlace function
+                data.elements.forEach(function(place) {
+                    // Use a try-catch to handle any missing data errors
+                    try {
+                        const lat = place.lat || place.center.lat;
+                        const lon = place.lon || place.center.lon;
+                        const name = place.tags.name || 'Attraction';
+                        addPlace(name, lat, lon);
+                    } catch (error) {
+                        console.error('Error adding place:', error);
+                    }
+                });
+            })
+            .catch(error => {
+                console.error('Error with Overpass API:', error);
+            });
+        }
+
+        // Get the user's current position and then use it to get nearby places
+        navigator.geolocation.getCurrentPosition(function(position) {
+            getNearbyPlaces(position.coords.latitude, position.coords.longitude);
+        }, function(error) {
+            console.error('Error getting location:', error);
+        });
+
     </script>
 </body>
 
