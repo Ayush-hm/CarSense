@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <script src="https://aframe.io/releases/1.2.0/aframe.min.js"></script>
+    <script src="https://cdn.rawgit.com/jeromeetienne/AR.js/2.2.2/aframe/build/aframe-ar.js"></script>
+</head>
+
+<body style="margin: 0; overflow: hidden;">
+    <a-scene embedded arjs="sourceType: webcam; debugUIEnabled: false;" vr-mode-ui="enabled: false">
+        <!-- User's location marker -->
+        <a-marker gps-camera-user-location>
+            <a-box position="0 0.5 0" color="#4CC3D9"></a-box>
+        </a-marker>
+
+        <!-- Places container -->
+        <a-entity id="places-container"></a-entity>
+    </a-scene>
+
+    <script>
+        // Get user's location
+        if ('geolocation' in navigator) {
+            navigator.geolocation.getCurrentPosition(function (position) {
+                const userLatitude = position.coords.latitude;
+                const userLongitude = position.coords.longitude;
+
+                // Call a function to load nearby places using userLatitude and userLongitude
+                loadNearbyPlaces(userLatitude, userLongitude);
+            });
+        } else {
+            console.error('Geolocation is not available in this browser.');
+        }
+
+        // Load nearby places using the Google Places API
+        // Load nearby places using Nominatim API
+        function loadNearbyPlaces(latitude, longitude) {
+            const apiUrl = `https://nominatim.openstreetmap.org/reverse?format=json&lat=${latitude}&lon=${longitude}`;
+
+            fetch(apiUrl)
+                .then((response) => response.json())
+                .then((data) => {
+                    // Parse the Nominatim response and extract nearby places or addresses.
+                    const nearbyPlaces = data.display_name; // You can choose which part of the response to display.
+
+                    // Create an AR marker for the nearby place.
+                    const placeMarker = document.createElement('a-marker');
+                    placeMarker.setAttribute('gps-entity-place', `latitude: ${latitude}; longitude: ${longitude};`);
+                    placeMarker.innerHTML = `<a-box position="0 0.5 0" color="#FF5733" scale="0.5 0.5 0.5"></a-box>`;
+                    placesContainer.appendChild(placeMarker);
+                })
+                .catch((error) => console.error('Error loading nearby places:', error));
+        }
+
+    </script>
+</body>
+
+</html>
