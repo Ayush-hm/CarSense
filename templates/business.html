@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Names List</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+
+<body style="display: flexbox; background-color: black; color: aqua; ">
+    <div style="float: left; margin-left: 3rem;">
+        <h1 style="color: aliceblue;">Nearby Businesses</h1>
+        <ul style="text-align: center; list-style-type: none; ">
+            {% for name in names_list %}
+            <li style="text-decoration: none;color: aqua">{{ name }}</li>
+            {% endfor %}
+        </ul>
+    </div>
+    <div style="float:right; margin-right: 9rem;">
+        <h1 style="color: aliceblue;">Vehicle Vitals</h1>
+        <div class="dashboard">
+            <div class="gauge">
+                <div>
+                    <!-- <img src="../Assets/Speedometer.png" alt="Speed"> -->
+                    <span>Speed: 88 mph</span>
+                </div>
+                <div>
+                    <!-- <img src="../Assets/Fuel.png" alt="Fuel"> -->
+                    <span>Fuel: 3/4 Full</span>
+                </div>
+                <div>
+                    <!-- <img src="../Assets/Temperature.jpeg" alt="Temperature"> -->
+                    <span>Temperature: 210°F</span>
+                </div>
+            </div>
+
+            <div class="vitals">
+                <div class="vital-item">
+                    <span class="vital-title">Odometer</span>
+                    <span class="vital-value">48,523 mi</span>
+                </div>
+                <div class="vital-item">
+                    <span class="vital-title">Oil Life</span>
+                    <span class="vital-value">60%</span>
+                </div>
+                <div class="vital-item">
+                    <span class="vital-title">Tire Pressure</span>
+                    <span class="vital-value">32 psi</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+
+</html>

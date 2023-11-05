@@ -3,98 +3,32 @@
 
 <head>
     <script src="https://aframe.io/releases/1.2.0/aframe.min.js"></script>
-    <script src="https://raw.githack.com/AR-js-org/AR.js/master/aframe/build/aframe-ar.js"></script>
-    <title>AR Nearby Places</title>
+    <script src="https://cdn.rawgit.com/jeromeetienne/AR.js/2.2.2/aframe/build/aframe-ar.js"></script>
 </head>
 
-<body style="margin: 0; overflow: hidden;">
-    <a-scene embedded arjs='sourceType: webcam;'>
-        
-        <!-- Here we setup the AR scene with a camera -->
+<body style='margin: 0px; overflow: hidden;'>
+    <a-scene embedded arjs>
+        <a-marker type="pattern" url="../pattern-letterA.patt">
+            <a-plane id="ground" position="0 0 0" rotation="-90 0 0" width="4" height="2.25"
+                material="shader: flat; scale: 2 2 2">
+
+            </a-plane>
+        </a-marker>
         <a-entity camera></a-entity>
-
-        <!-- This is the container for our places -->
-        <a-entity id="places-container"></a-entity>
-
     </a-scene>
 
     <script>
-        // Function to add a place in AR
-        function addPlace(name, latitude, longitude) {
-            // Create a new entity for the place
-            const place = document.createElement('a-entity');
+        // Function to update the image every N seconds
+        function updateImage() {
+            const imagePlane = document.getElementById('ground');
+            const imageUrl = './WebpageScreenshot/image.png'; // Change this to your image source URL
 
-            // Use the gps-entity-place component to position the entity at the correct latitude and longitude
-            place.setAttribute('gps-entity-place', `latitude: ${latitude}; longitude: ${longitude};`);
-
-            // Add a 3D model or a simple shape for the place
-            place.innerHTML = `
-                <a-box position="0 1 0" material="opacity: 0.75;" height="2">
-                    <a-text value="${name}" side="double" anchor="center" align="center" position="0 0 0.51" width="4"></a-text>
-                </a-box>
-            `;
-
-            // Append the place to the places container
-            document.querySelector('#places-container').appendChild(place);
+            // Set the new image source
+            imagePlane.setAttribute('src', imageUrl);
         }
 
-        // This function will get nearby places of attraction from the Overpass API
-        function getNearbyPlaces(latitude, longitude) {
-            const query = `
-                [out:json][timeout:25];
-                // gather results
-                (
-                  // query for nodes (points of interest)
-                  node["tourism"="attraction"](around:200000,${latitude},${longitude});
-                  // query for ways (polygons)
-                  way["tourism"="attraction"](around:200000,${latitude},${longitude});
-                  // query for relations (complex structures)
-                  relation["tourism"="attraction"](around:200000,${latitude},${longitude});
-                );
-                // print results
-                out body;
-                >;
-                out skel qt;
-            `;
-
-            // Overpass API URL
-            const overpassUrl = 'https://overpass-api.de/api/interpreter';
-
-            // Make an AJAX request to the Overpass API
-            fetch(overpassUrl, {
-                method: 'POST',
-                body: 'data=' + encodeURIComponent(query),
-                headers: {
-                    'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8'
-                }
-            })
-            .then(response => response.json())
-            .then(data => {
-                // Process the JSON data into the addPlace function
-                data.elements.forEach(function(place) {
-                    // Use a try-catch to handle any missing data errors
-                    try {
-                        const lat = place.lat || place.center.lat;
-                        const lon = place.lon || place.center.lon;
-                        const name = place.tags.name || 'Attraction';
-                        addPlace(name, lat, lon);
-                    } catch (error) {
-                        console.error('Error adding place:', error);
-                    }
-                });
-            })
-            .catch(error => {
-                console.error('Error with Overpass API:', error);
-            });
-        }
-
-        // Get the user's current position and then use it to get nearby places
-        navigator.geolocation.getCurrentPosition(function(position) {
-            getNearbyPlaces(position.coords.latitude, position.coords.longitude);
-        }, function(error) {
-            console.error('Error getting location:', error);
-        });
-
+        // Call the updateImage function every 10 seconds (10000 milliseconds)
+        setInterval(updateImage, 5);
     </script>
 </body>
 
