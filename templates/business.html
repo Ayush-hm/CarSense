@@ -3,25 +3,25 @@
 
 <head>
     <title>Names List</title>
-    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="../static/styles.css">
 </head>
 
-<body style="display: flexbox; background-color: black; color: aqua; ">
+<body style="display: flexbox; background: transparent;">
     <div style="float: left; margin-left: 3rem;">
-        <h1 style="color: aliceblue;">Nearby Businesses</h1>
-        <ul style="text-align: center; list-style-type: none; ">
+        <h1 style="color: rgb(0, 0, 0);">Nearby Businesses</h1>
+        <ul style="text-align: left; list-style-type: none; ">
             {% for name in names_list %}
-            <li style="text-decoration: none;color: aqua">{{ name }}</li>
+            <li style="text-decoration: none;color: rgb(0, 0, 0); font-size: x-large;">{{ name }}</li>
             {% endfor %}
         </ul>
     </div>
-    <div style="float:right; margin-right: 9rem;">
-        <h1 style="color: aliceblue;">Vehicle Vitals</h1>
+    <div style="float:right; margin-right: 5rem;">
+        <h1 style="color: rgb(0, 0, 0);">Vehicle Vitals</h1>
         <div class="dashboard">
             <div class="gauge">
                 <div>
                     <!-- <img src="../Assets/Speedometer.png" alt="Speed"> -->
-                    <span>Speed: 88 mph</span>
+                    <span id="speedDisplay">Speed: 20 mph</span>
                 </div>
                 <div>
                     <!-- <img src="../Assets/Fuel.png" alt="Fuel"> -->
@@ -29,7 +29,7 @@
                 </div>
                 <div>
                     <!-- <img src="../Assets/Temperature.jpeg" alt="Temperature"> -->
-                    <span>Temperature: 210°F</span>
+                    <span id="temperatureDisplay">Temperature: 210°F</span>
                 </div>
             </div>
 
@@ -49,6 +49,46 @@
             </div>
         </div>
     </div>
+
+
+    <script>
+        // JavaScript to update speed gradually
+        let speed = 20;
+        let temperature = 210;
+        const speedDisplay = document.getElementById('speedDisplay');
+        const temperatureDisplay = document.getElementById('temperatureDisplay');
+
+        function updateSpeed() {
+            speedDisplay.textContent = `Speed: ${speed} mph`;
+
+            // Increase speed up to 80, then decrease to 20
+            if (speed < 80) {
+                speed += 2;
+            } else {
+                speed -= 2;
+            }
+        }
+
+        function updateTemperature() {
+            temperatureDisplay.textContent = `Temperature: ${temperature}°F`;
+
+            // Increase temperature less frequently
+            if (Math.random() > 0.5) {
+                temperature += 0.5;
+            }
+        }
+
+        function updateVitals() {
+            updateSpeed();
+            updateTemperature();
+
+            // Repeat the update every 500 milliseconds (adjust as needed)
+            setTimeout(updateVitals, 10000);
+        }
+
+        // Start the update process
+        updateVitals();
+    </script>
 </body>
 
 </html>

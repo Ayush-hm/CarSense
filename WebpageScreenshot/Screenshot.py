@@ -10,18 +10,18 @@ driver = webdriver.Chrome()
 # URL of the website
 url = "http://127.0.0.1:8081/"
 
+while(True):
+        # Opening the website
+    driver.get(url)
 
-    # Opening the website
-driver.get(url)
+        # Check if the old image file exists and delete it
+        # if os.path.exists("image.png"):
+        #     os.remove("image.png")
 
-    # Check if the old image file exists and delete it
-    # if os.path.exists("image.png"):
-    #     os.remove("image.png")
+        # Save a new screenshot
+    driver.save_screenshot("image.png")
 
-    # Save a new screenshot
-driver.save_screenshot("image.png")
-
-    # Loading the new image
-image = Image.open("image.png")
+        # Loading the new image
+    image = Image.open("image.png")
 
     # image.show()

@@ -1,6 +1,5 @@
 <!DOCTYPE html>
 <html>
-
 <head>
     <script src="https://aframe.io/releases/1.2.0/aframe.min.js"></script>
     <script src="https://cdn.rawgit.com/jeromeetienne/AR.js/2.2.2/aframe/build/aframe-ar.js"></script>
@@ -9,8 +8,8 @@
 <body style='margin: 0px; overflow: hidden;'>
     <a-scene embedded arjs>
         <a-marker type="pattern" url="../pattern-letterA.patt">
-            <a-plane id="ground" position="0 0 0" rotation="-90 0 0" width="4" height="2.25"
-                material="shader: flat; scale: 2 2 2">
+            <a-plane id="ground" position="0 0 0" rotation="-90 0 0" width="3" height="2"
+                material="opacity:0.8; transparent:true; ">
 
             </a-plane>
         </a-marker>
@@ -21,14 +20,14 @@
         // Function to update the image every N seconds
         function updateImage() {
             const imagePlane = document.getElementById('ground');
-            const imageUrl = './WebpageScreenshot/image.png'; // Change this to your image source URL
+           const imageUrl = './WebpageScreenshot/image.png'; // Change this to your image source URL
 
             // Set the new image source
             imagePlane.setAttribute('src', imageUrl);
         }
 
         // Call the updateImage function every 10 seconds (10000 milliseconds)
-        setInterval(updateImage, 5);
+        setInterval(updateImage, 10000);
     </script>
 </body>
 
